@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Compound Nouns and Adjectives</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f9; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .container { width: 100%; max-width: 600px; text-align: center; }
+        .timer-panel { background: #2c3e50; color: white; padding: 10px; border-radius: 50px; margin-bottom: 20px; display: flex; gap: 8px; justify-content: center; align-items: center; min-height: 45px; }
+        #menu-screen { display: none; flex-direction: column; gap: 8px; align-items: center; }
+        #menu-screen.active { display: flex; }
+        .btn-menu { background: #3498db; color: white; width: 85%; padding: 10px 15px; font-size: 0.95rem; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        .btn-finish { background: #e74c3c; margin-top: 10px; }
+        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: none; border-top: 8px solid #3498db; width: 100%; box-sizing: border-box; }
+        .card.active { display: block; }
+        .btn-option { background: #ecf0f1; color: #2c3e50; width: 48%; padding: 12px; margin: 5px 1%; border-radius: 8px; font-size: 0.9rem; border: none; cursor: pointer; font-weight: 600; }
+        .btn-action { background: #2ecc71; color: white; padding: 12px 25px; border-radius: 10px; margin: 10px 5px; min-width: 140px; font-weight: 600; border: none; cursor: pointer; }
+        .btn-shuffle { background: #f39c12; color: white; padding: 12px 25px; border-radius: 10px; margin: 10px 5px; min-width: 140px; font-weight: 600; border: none; cursor: pointer; }
+        .btn-secondary { background: #95a5a6; color: white; padding: 12px 25px; border-radius: 10px; margin: 10px 5px; min-width: 140px; font-weight: 600; border: none; cursor: pointer; }
+        .word-display { font-size: 2rem; color: #e67e22; font-weight: bold; margin-bottom: 20px; }
+        .definition { font-style: italic; font-size: 1.1rem; color: #34495e; margin-bottom: 25px; line-height: 1.5; }
+        .answer-box { background: #fdfdfd; padding: 15px; border: 2px dashed #2ecc71; border-radius: 8px; margin-bottom: 15px; display: none; font-weight: bold; color: #27ae60; font-size: 1.3rem; }
+        input[type="text"] { width: 90%; padding: 12px; border-radius: 10px; border: 2px solid #ddd; font-size: 1rem; margin-bottom: 15px; outline: none; transition: 0.3s; }
+        .feedback { min-height: 25px; font-weight: bold; margin-bottom: 10px; font-size: 0.95rem; line-height: 1.4; }
+        .correct-input { border-color: #2ecc71 !important; background-color: #eafaf1; }
+        .wrong-input { border-color: #e74c3c !important; background-color: #fdeaeb; }
+    </style>
+</head>
+<body>
+
+<div class="container" id="game-container">
+    <div class="timer-panel" id="timer-panel">
+        <div id="timer-display" style="font-size: 1.1rem; font-weight: bold; min-width: 90px; color: #2ecc71;">00:00</div>
+        <button onclick="startTimer(60)" style="background:#16a085; color:white; font-size:0.7rem; padding:5px 10px; border-radius:15px; border:none; cursor:pointer;">60s</button>
+        <button onclick="startTimer(90)" style="background:#16a085; color:white; font-size:0.7rem; padding:5px 10px; border-radius:15px; border:none; cursor:pointer;">90s</button>
+        <button onclick="startNoTimer()" style="background:#7f8c8d; color:white; font-size:0.7rem; padding:5px 10px; border-radius:15px; border:none; cursor:pointer;">No Timer</button>
+    </div>
+
+    <div id="menu-screen" class="active">
+        <h2 style="color: #2c3e50; margin-bottom: 15px;">Compound Nouns and Adjectives</h2>
+        <button class="btn-menu" onclick="showTask(1)">1. Word → Russian Choice</button>
+        <button class="btn-menu" onclick="showTask(2)">2. Definition Quiz (Choice)</button>
+        <button class="btn-menu" onclick="showTask(3)">3. Pure Recall (Definitions)</button>
+        <button class="btn-menu" onclick="showTask(4)">4. Discussion Club (25 Qs)</button>
+        <button class="btn-menu" onclick="showTask(5)">5. Translation Master</button>
+        <button class="btn-menu btn-finish" onclick="finishSession()">Finish Session</button>
+    </div>
+
+    <div id="task1" class="card">
+        <h3>Task 1: Select Translation</h3>
+        <div id="t1-word" class="word-display"></div>
+        <div id="t1-options"></div>
+        <div id="t1-feedback" class="feedback"></div>
+        <button class="btn-shuffle" onclick="loadT1()">Shuffle</button>
+        <button class="btn-secondary" onclick="showMenu()">← Main Menu</button>
+    </div>
+
+    <div id="task2" class="card">
+        <h3>Task 2: Definition Quiz</h3>
+        <div id="t2-def" class="definition"></div>
+        <div id="t2-options"></div>
+        <div id="t2-feedback" class="feedback"></div>
+        <button class="btn-shuffle" onclick="loadT2()">Shuffle</button>
+        <button class="btn-secondary" onclick="showMenu()">← Main Menu</button>
+    </div>
+
+    <div id="task3" class="card">
+        <h3>Task 3: Recall the Word</h3>
+        <div id="t3-def" class="definition"></div>
+        <div id="t3-answer" class="answer-box"></div>
+        <button class="btn-action" onclick="document.getElementById('t3-answer').style.display='block'">Check Answer</button>
+        <button class="btn-action" style="background:#8e44ad" onclick="incrementScore(); loadT3();">Next Word</button>
+        <button class="btn-shuffle" onclick="loadT3()">Shuffle</button>
+        <button class="btn-secondary" onclick="showMenu()">← Main Menu</button>
+    </div>
+
+    <div id="task4" class="card">
+        <h3>Task 4: Talk & Discuss</h3>
+        <div id="t4-q" class="definition" style="font-style: normal; font-weight: 600; color: #2c3e50;"></div>
+        <button class="btn-action" onclick="loadT4()">Next Question</button>
+        <button class="btn-shuffle" onclick="loadT4()">Shuffle</button>
+        <button class="btn-secondary" onclick="showMenu()">← Main Menu</button>
+    </div>
+
+    <div id="task5" class="card">
+        <h3>Task 5: Translation Master</h3>
+        <div id="t5-rus" class="definition" style="font-style: normal; color:#2c3e50;"></div>
+        <input type="text" id="t5-input" placeholder="Type English translation..." oninput="this.className=''">
+        <div id="t5-feedback" class="feedback"></div>
+        <button class="btn-action" onclick="checkT5()">Check / Right</button>
+        <button class="btn-action" style="background:#8e44ad" onclick="loadT5()">Next Sentence</button>
+        <button class="btn-shuffle" onclick="loadT5()">Shuffle</button>
+        <button class="btn-secondary" onclick="showMenu()">← Main Menu</button>
+    </div>
+</div>
+
+<script>
+let timeLeft = 0, timerInterval;
+let cardsCompleted = 0;
+let isTimerActive = false;
+
+const vocabulary = [
+    { word: "breakthrough", trans: "прорыв", def: "A sudden, important discovery or development." },
+    { word: "lifespan", trans: "продолжительность жизни", def: "The length of time for which a person or animal lives." },
+    { word: "outcome", trans: "результат, выход", def: "The final result or effect of something." },
+    { word: "setback", trans: "неудача", def: "A problem that delays or prevents progress." },
+    { word: "drawback", trans: "недостаток", def: "A disadvantage or negative part of a situation." },
+    { word: "feedback", trans: "обратная связь", def: "Information about how good or useful something is." },
+    { word: "outlook", trans: "взгляд/перспектива", def: "A person's point of view or general attitude to life." },
+    { word: "outcry", trans: "протест", def: "A strong expression of public anger or disapproval." },
+    { word: "worthwhile", trans: "стоящий/полезный", def: "Useful, important, or good enough for the effort." },
+    { word: "worldwide", trans: "всемирный", def: "Existing or happening in all parts of the world." },
+    { word: "crackdown", trans: "жесткие меры", def: "Severe action taken to limit bad or illegal behaviour." },
+    { word: "cutback", trans: "сокращение бюджета", def: "A reduction in something, such as money, to save costs." },
+    { word: "outset", trans: "начало", def: "The beginning or start of something." },
+    { word: "full-scale", trans: "полномасштабный", def: "Involving all the resources or power available." },
+    { word: "long-term", trans: "долгосрочный", def: "Continuing a long time into the future." },
+    { word: "lightweight", trans: "легкий", def: "Not weighing much; easy to carry." }
+];
+
+const sentences = [
+    { rus: "Это был настоящий прорыв в медицине.", full: "It was a real breakthrough in medicine.", key: "breakthrough" },
+    { rus: "У этой идеи есть один главный недостаток.", full: "This idea has one main drawback.", key: "drawback" },
+    { rus: "Каков был исход игры?", full: "What was the outcome of the game?", key: "outcome" },
+    { rus: "Это стоящий проект?", full: "Is it a worthwhile project?", key: "worthwhile" },
+    { rus: "У него очень позитивный взгляд на жизнь.", full: "He has a very positive outlook on life.", key: "outlook" },
+    { rus: "Мы не ожидали такой неудачи.", full: "We didn't expect such a setback.", key: "setback" },
+    { rus: "В самом начале мы были полны надежд.", full: "At the outset, we were full of hope.", key: "outset" },
+    { rus: "Полиция начала жесткие меры против преступности.", full: "The police started a crackdown on crime.", key: "crackdown" },
+    { rus: "Будут ли сокращения бюджета в этом году?", full: "Will there be any budget cutbacks this year?", key: "cutback" },
+    { rus: "Это полномасштабная модель города.", full: "It is a full-scale model of the city.", key: "full-scale" },
+    { rus: "Ваша обратная связь очень важна для нас.", full: "Your feedback is very important to us.", key: "feedback" },
+    { rus: "Это долгосрочное решение проблемы.", full: "It is a long-term solution to the problem.", key: "long-term" },
+    { rus: "Этот ноутбук очень легкий.", full: "This laptop is very lightweight.", key: "lightweight" },
+    { rus: "Какова средняя продолжительность жизни в вашей стране?", full: "What is the average lifespan in your country?", key: "lifespan" }
+];
+
+const questions = [
+    "What is the most important breakthrough in tech for you?",
+    "Should schools give feedback to parents every week?",
+    "What is the main drawback of social media for teens?",
+    "Is it worthwhile to study during summer holidays?",
+    "How has your outlook on life changed since last year?",
+    "Do you think a crackdown on cyberbullying is necessary?",
+    "What was your biggest setback in learning any subject?",
+    "What's your long-term goal for the next 5 years?",
+    "Is it better to have a worldwide reputation or be local?",
+    "What was the outcome of your last test?",
+    "Is a lightweight laptop more useful than a powerful one?",
+    "What is the average lifespan of a modern smartphone?",
+    "Why do people usually experience a public outcry?",
+    "What did you decide at the outset of this school year?",
+    "Is it worthwhile to spend a lot of money on clothes?",
+    "Can one breakthrough discovery change the world forever?",
+    "How do you handle negative feedback from teachers?",
+    "What drawbacks does living in a big city have?",
+    "Is a full-scale lockdown possible again in the future?",
+    "What setbacks can a young business person face?",
+    "Is a positive outlook essential for success?",
+    "Do you prefer long-term or short-term planning?"
+];
+
+function incrementScore() { 
+    if(isTimerActive) {
+        cardsCompleted++; 
+    }
+}
+
+function showTask(num) {
+    document.getElementById('menu-screen').classList.remove('active');
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+    document.getElementById('task' + num).classList.add('active');
+    window['loadT' + num]();
+}
+
+function showMenu() {
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+    document.getElementById('menu-screen').classList.add('active');
+}
+
+function finishSession() {
+    clearInterval(timerInterval);
+    isTimerActive = false;
+    timeLeft = 0;
+    cardsCompleted = 0;
+    document.getElementById('timer-display').innerText = "00:00";
+    document.getElementById('timer-display').style.color = "#2ecc71";
+    showMenu();
+}
+
+function loadT1() {
+    const item = vocabulary[Math.floor(Math.random()*vocabulary.length)];
+    document.getElementById('t1-word').innerText = item.word;
+    const cont = document.getElementById('t1-options'); cont.innerHTML = '';
+    let choices = [item.trans];
+    while(choices.length < 4) {
+        let r = vocabulary[Math.floor(Math.random()*vocabulary.length)].trans;
+        if(!choices.includes(r)) choices.push(r);
+    }
+    choices.sort(() => Math.random()-0.5).forEach(c => {
+        const b = document.createElement('button'); b.className = 'btn-option'; b.innerText = c;
+        b.onclick = () => { 
+            if(c === item.trans) { 
+                incrementScore();
+                document.getElementById('t1-feedback').innerHTML = "<span style='color:#2ecc71'>✅ Right!</span>"; 
+                setTimeout(loadT1, 800); 
+            }
+            else { document.getElementById('t1-feedback').innerHTML = "<span style='color:#e74c3c'>❌ Try again!</span>"; }
+        };
+        cont.appendChild(b);
+    });
+    document.getElementById('t1-feedback').innerText = '';
+}
+
+function loadT2() {
+    const item = vocabulary[Math.floor(Math.random()*vocabulary.length)];
+    document.getElementById('t2-def').innerText = item.def;
+    const cont = document.getElementById('t2-options'); cont.innerHTML = '';
+    let choices = [item.word];
+    while(choices.length < 4) {
+        let r = vocabulary[Math.floor(Math.random()*vocabulary.length)].word;
+        if(!choices.includes(r)) choices.push(r);
+    }
+    choices.sort(() => Math.random()-0.5).forEach(c => {
+        const b = document.createElement('button'); b.className = 'btn-option'; b.innerText = c;
+        b.onclick = () => {
+            if(c === item.word) { 
+                incrementScore();
+                document.getElementById('t2-feedback').innerHTML = "<span style='color:#2ecc71'>✅ Right!</span>"; 
+                setTimeout(loadT2, 800); 
+            }
+            else { document.getElementById('t2-feedback').innerHTML = "<span style='color:#e74c3c'>❌ Wrong!</span>"; }
+        };
+        cont.appendChild(b);
+    });
+    document.getElementById('t2-feedback').innerText = '';
+}
+
+function loadT3() {
+    const item = vocabulary[Math.floor(Math.random()*vocabulary.length)];
+    document.getElementById('t3-def').innerText = item.def;
+    document.getElementById('t3-answer').innerText = item.word.toUpperCase();
+    document.getElementById('t3-answer').style.display = 'none';
+}
+
+function loadT4() {
+    document.getElementById('t4-q').innerText = questions[Math.floor(Math.random()*questions.length)];
+}
+
+function loadT5() {
+    const item = sentences[Math.floor(Math.random()*sentences.length)];
+    document.getElementById('t5-rus').innerText = item.rus;
+    const input = document.getElementById('t5-input');
+    input.value = '';
+    input.className = '';
+    document.getElementById('t5-feedback').dataset.key = item.key;
+    document.getElementById('t5-feedback').dataset.full = item.full;
+    document.getElementById('t5-feedback').innerText = '';
+}
+
+function checkT5() {
+    const input = document.getElementById('t5-input');
+    const val = input.value.toLowerCase().trim();
+    const keyWord = document.getElementById('t5-feedback').dataset.key;
+    const fullSent = document.getElementById('t5-feedback').dataset.full;
+    
+    if(val.includes(keyWord)) {
+        input.className = 'correct-input';
+        document.getElementById('t5-feedback').innerHTML = "<span style='color:#2ecc71'>✅ Correct!</span><br><small style='color:#7f8c8d'>" + fullSent + "</small>";
+    } else {
+        input.className = 'wrong-input';
+        document.getElementById('t5-feedback').innerHTML = "<span style='color:#e74c3c'>❌ Try again!</span><br><b>Correct sentence:</b><br>" + fullSent;
+    }
+}
+
+function startTimer(sec) {
+    cardsCompleted = 0;
+    isTimerActive = true;
+    clearInterval(timerInterval);
+    timeLeft = sec;
+    document.getElementById('timer-display').style.color = "#2ecc71";
+    updateTimerDisplay();
+    
+    timerInterval = setInterval(() => {
+        timeLeft--; 
+        if(timeLeft <= 0) { 
+            clearInterval(timerInterval); 
+            isTimerActive = false;
+            document.getElementById('timer-display').innerText = "Done: " + cardsCompleted;
+            document.getElementById('timer-display').style.color = "#f1c40f"; 
+        } else {
+            updateTimerDisplay();
+        }
+    }, 1000);
+}
+
+function startNoTimer() { 
+    isTimerActive = false; 
+    clearInterval(timerInterval); 
+    document.getElementById('timer-display').innerText = "Free Play"; 
+    document.getElementById('timer-display').style.color = "#7f8c8d";
+}
+
+function updateTimerDisplay() {
+    let m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+    document.getElementById('timer-display').innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+}
+</script>
+</body>
+</html>
